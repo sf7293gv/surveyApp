@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">surveyApp</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="number_of_no_answers">Number of no answers:</string>
+    <string name="number_of_yes_answers">Number of yes answers:</string>
+    <string name="textview">TextView</string>
+    <string name="endOfSurvey">Thank you for taking the survey</string>
+
+</resources>
