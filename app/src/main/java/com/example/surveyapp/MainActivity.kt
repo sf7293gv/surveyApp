@@ -11,6 +11,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var yesButton: Button
     private lateinit var noButton: Button
+    private lateinit var reset: Button
     private lateinit var question: TextView
     private lateinit var yesTextView: TextView
     private lateinit var noTextView: TextView
@@ -26,6 +27,7 @@ class MainActivity : AppCompatActivity() {
 
         connectViewsWithIDs()
         addQuestionsToList()
+        updateAnswerTextViews()
 
         question.text = questionsList[0]
 
@@ -37,15 +39,17 @@ class MainActivity : AppCompatActivity() {
             buttonJob(0)
         }
 
+        reset.setOnClickListener {
+            resetAll()
+        }
+
     }
 
     /* This function when called will do the button's job, which is to update the question and the textviews or
      notify the user that the survey has ended */
     private fun buttonJob(yesOrNo: Int) {
         if (counter > questionsList.size - 1) {
-            noButton.isVisible = false
-            yesButton.isVisible = false
-            question.isVisible = false
+            visibilityFun(0)
             Toast.makeText(this, getString(R.string.endOfSurvey), Toast.LENGTH_SHORT).show()
         } else {
             counter++
@@ -59,6 +63,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // When this function is called it will set the visibility of these variable to true (if passed 1) or false (else)
+    private fun visibilityFun(tOrF: Int) {
+        if (tOrF == 1) {
+            noButton.isVisible = true
+            yesButton.isVisible = true
+            question.isVisible = true
+        } else {
+            noButton.isVisible = false
+            yesButton.isVisible = false
+            question.isVisible = false
+        }
+    }
+
     // This function connects the variable with the buttons and textviews... from the design
     private fun connectViewsWithIDs() {
         yesButton = findViewById(R.id.yes_btn)
@@ -66,6 +83,17 @@ class MainActivity : AppCompatActivity() {
         question = findViewById(R.id.question_text)
         yesTextView = findViewById(R.id.yesText)
         noTextView = findViewById(R.id.noText)
+        reset = findViewById(R.id.resetButton)
+    }
+
+    // This function will reset all the counters and textviews when called
+    private fun resetAll() {
+        counter = 0
+        yesCounter = 0
+        noCounter = 0
+        question.text = questionsList[0]
+        updateAnswerTextViews()
+        visibilityFun(1)
     }
 
     // This functions adds questions to the list of questions
