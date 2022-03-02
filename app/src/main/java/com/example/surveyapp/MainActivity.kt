@@ -1,25 +1,34 @@
 package com.example.surveyapp
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
+
+const val YES_COUNTER = "com.example.surveyapp.yes_counter"
+const val NO_COUNTER = "com.example.surveyapp.no_counter"
+
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var yesButton: Button
     private lateinit var noButton: Button
-    private lateinit var reset: Button
+    private lateinit var resultButton: Button
     private lateinit var question: TextView
-    private lateinit var yesTextView: TextView
-    private lateinit var noTextView: TextView
 
     private val questionsList = mutableListOf<String>()
     private var counter = 0
     private var yesCounter = 0
     private var noCounter = 0
+
+    private val resultActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        result -> retakingSurvey(result)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 
         connectViewsWithIDs()
         addQuestionsToList()
-        updateAnswerTextViews()
+//        updateAnswerTextViews()
 
         question.text = questionsList[0]
 
@@ -39,10 +48,20 @@ class MainActivity : AppCompatActivity() {
             buttonJob(0)
         }
 
-        reset.setOnClickListener {
-            resetAll()
+        resultButton.setOnClickListener {
+//            resetAll()
+            showResultActivity()
         }
 
+    }
+
+    // This function will launch the results activity
+    private fun showResultActivity() {
+        val showResultsActivity = Intent(this, SurveyResultActivity::class.java)
+        showResultsActivity.putExtra(YES_COUNTER, yesCounter)
+        showResultsActivity.putExtra(NO_COUNTER, noCounter)
+//        startActivity(showResultsActivity)
+        resultActivityLauncher.launch(showResultsActivity)
     }
 
     /* This function when called will do the button's job, which is to update the question and the textviews or
@@ -51,6 +70,8 @@ class MainActivity : AppCompatActivity() {
         if (counter > questionsList.size - 1) {
             visibilityFun(0)
             Toast.makeText(this, getString(R.string.endOfSurvey), Toast.LENGTH_SHORT).show()
+            resultButton.isVisible = true
+
         } else {
             counter++
             if (yesOrNo == 1) {
@@ -59,7 +80,7 @@ class MainActivity : AppCompatActivity() {
                 noCounter++
             }
             updateQuestion()
-            updateAnswerTextViews()
+//            updateAnswerTextViews()
         }
     }
 
@@ -69,6 +90,7 @@ class MainActivity : AppCompatActivity() {
             noButton.isVisible = true
             yesButton.isVisible = true
             question.isVisible = true
+            resultButton.isVisible = false
         } else {
             noButton.isVisible = false
             yesButton.isVisible = false
@@ -81,9 +103,7 @@ class MainActivity : AppCompatActivity() {
         yesButton = findViewById(R.id.yes_btn)
         noButton = findViewById(R.id.no_btn)
         question = findViewById(R.id.question_text)
-        yesTextView = findViewById(R.id.yesText)
-        noTextView = findViewById(R.id.noText)
-        reset = findViewById(R.id.resetButton)
+        resultButton = findViewById(R.id.result_btn)
     }
 
     // This function will reset all the counters and textviews when called
@@ -92,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         yesCounter = 0
         noCounter = 0
         question.text = questionsList[0]
-        updateAnswerTextViews()
+//        updateAnswerTextViews()
         visibilityFun(1)
     }
 
@@ -111,10 +131,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // This function updates the values of textviews
-    private fun updateAnswerTextViews() {
-        yesTextView.text = yesCounter.toString()
-        noTextView.text = noCounter.toString()
+    // This function will reset the survey when the app comes back from the results activity
+    private fun retakingSurvey(result: ActivityResult) {
+        if (result.resultCode == RESULT_OK) {
+            val intent = result.data
+            val mustBeTrueToRest = intent?.getBooleanExtra(GO_BACK_TO_SURVEY, true)
+            if (mustBeTrueToRest == true) {
+                resetAll()
+            }
+        }
     }
+
+
 
 }
